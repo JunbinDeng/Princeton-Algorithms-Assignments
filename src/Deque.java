@@ -10,6 +10,7 @@ public class Deque<Item> implements Iterable<Item> {
 
     private class Node {
         private Item item;
+        private Node prev;
         private Node next;
     }
 
@@ -41,12 +42,12 @@ public class Deque<Item> implements Iterable<Item> {
         checkItem(item);
         Node node = new Node();
         node.item = item;
-        if (isEmpty()) {
-            node.next = null;
+        if (first == null) {
             first = node;
             last = node;
         } else {
             node.next = first;
+            node.next.prev = node;
             first = node;
         }
         size++;
@@ -59,13 +60,14 @@ public class Deque<Item> implements Iterable<Item> {
         checkItem(item);
         Node node = new Node();
         node.item = item;
-        node.next = null;
-        if (isEmpty()) {
+        if (last == null) {
             first = node;
+            last = node;
         } else {
-            last.next = node;
+            node.prev = last;
+            node.prev.next = node;
+            last = node;
         }
-        last = node;
         size++;
     }
 
@@ -75,9 +77,12 @@ public class Deque<Item> implements Iterable<Item> {
     public Item removeFirst() {
         checkRemovable();
         Item item = first.item;
-        first = first.next;
-        if (isEmpty()) {
+        if (first.next == null) {
+            first = null;
             last = null;
+        } else {
+            first.next.prev = null;
+            first = first.next;
         }
         size--;
         return item;
@@ -89,17 +94,12 @@ public class Deque<Item> implements Iterable<Item> {
     public Item removeLast() {
         checkRemovable();
         Item item = last.item;
-        if (size == 1) {
+        if (last.prev == null) {
             first = null;
             last = null;
         } else {
-            for (Node current = first; current != null && current.next != null; current = current.next) {
-                if (current.next.next != null) {
-                    continue;
-                }
-                current.next = null;
-                last = current;
-            }
+            last.prev.next = null;
+            last = last.prev;
         }
         size--;
         return item;
