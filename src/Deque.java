@@ -89,14 +89,19 @@ public class Deque<Item> implements Iterable<Item> {
     public Item removeLast() {
         checkRemovable();
         Item item = last.item;
-        for (Node current = first; current != null && current.next != null; current = current.next) {
-            if (current.next.next != null) {
-                continue;
+        if (size == 1) {
+            first = null;
+            last = null;
+        } else {
+            for (Node current = first; current != null && current.next != null; current = current.next) {
+                if (current.next.next != null) {
+                    continue;
+                }
+                current.next = null;
+                last = current;
             }
-            current.next = null;
-            last = current;
-            size--;
         }
+        size--;
         return item;
     }
 
@@ -149,21 +154,23 @@ public class Deque<Item> implements Iterable<Item> {
      * Unit testing.
      */
     public static void main(String[] args) {
-        String item1 = "1";
-        String item2 = "2";
-        String item3 = "3";
-        String item4 = "4";
+        String item1 = "0";
+        String item2 = "1";
+        String item3 = "5";
 
         Deque<String> items = new Deque<>();
-        items.addFirst(item2);
-        items.addLast(item3);
         items.addFirst(item1);
-        items.addLast(item4);
-        items.removeFirst();
-        items.removeLast();
-
-        for (String item : items) {
-            StdOut.print(item + " ");
+        items.addFirst(item2);
+        String last = items.removeLast();
+        StdOut.println(last);
+        if (!items.isEmpty()) {
+            last = items.removeLast();
+            StdOut.println(last);
+        }
+        items.addFirst(item3);
+        if (!items.isEmpty()) {
+            last = items.removeLast();
+            StdOut.println(last);
         }
     }
 }
