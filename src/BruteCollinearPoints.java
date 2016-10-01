@@ -7,13 +7,17 @@ import java.util.Arrays;
 import java.util.List;
 
 public class BruteCollinearPoints {
-    private List<LineSegment> segments;
+    private List<LineSegment> segments = new ArrayList<>();
 
     /**
      * Finds all line segments containing 4 points.
      */
     public BruteCollinearPoints(Point[] points) {
-        segments = new ArrayList<>();
+        Point[] cPoints = points.clone();
+        Arrays.sort(cPoints);
+        if (hasRepeatedPoint(cPoints)) {
+            throw new IllegalArgumentException("Repeated point is not allowed in the array.");
+        }
         for (int i = 0; i < points.length - 3; i++) {
             for (int j = i + 1; j < points.length - 2; j++) {
                 for (int k = j + 1; k < points.length - 1; k++) {
@@ -48,6 +52,15 @@ public class BruteCollinearPoints {
      */
     public LineSegment[] segments() {
         return segments.toArray(new LineSegment[numberOfSegments()]);
+    }
+
+    private boolean hasRepeatedPoint(Point[] points) {
+        for (int i = 0; i < points.length - 1; i++) {
+            if (points[i].compareTo(points[i + 1]) == 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static void main(String[] args) {
