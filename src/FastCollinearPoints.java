@@ -21,7 +21,8 @@ public class FastCollinearPoints {
         for (int i = 0; i < cPoints.length - 3; i++) {
             Arrays.sort(cPoints);
             Arrays.sort(cPoints, cPoints[i].slopeOrder());
-            for (int p = 0, first = 1, last = 2; last < cPoints.length; last++) {
+            int p = 0, first = 1, last = 2;
+            while (last < cPoints.length) {
                 while (last < cPoints.length && Double.compare(cPoints[p].slopeTo(cPoints[first]),
                         cPoints[p].slopeTo(cPoints[last])) == 0) {
                     last++;
@@ -29,7 +30,7 @@ public class FastCollinearPoints {
                 if (cPoints[p].compareTo(cPoints[first]) < 0 && last - first >= 3) {
                     segments.add(new LineSegment(cPoints[p], cPoints[last - 1]));
                 }
-                first = last;
+                first = last++;
             }
         }
     }
