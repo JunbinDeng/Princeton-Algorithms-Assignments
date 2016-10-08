@@ -1,4 +1,6 @@
 import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.MinPQ;
+import edu.princeton.cs.algs4.Stack;
 import edu.princeton.cs.algs4.StdOut;
 
 public class Solver {
@@ -7,7 +9,33 @@ public class Solver {
      * Find a solution to the initial board (using the A* algorithm).
      */
     public Solver(Board initial) {
+        int moves = 0;
+        Node node = new Node(initial, moves, null);
+        Node twinNode = new Node(initial.twin(), moves, null);
 
+        MinPQ<Node> nodes = new MinPQ<>();
+        nodes.insert(node);
+        nodes.insert(twinNode);
+        node = nodes.delMin();
+
+        while (!node.board.isGoal()) {
+            Stack<Board> neighborBoards = new Stack<>();
+            for (Board board : node.board.neighbors()) {
+                neighborBoards.push(board);
+            }
+            moves = node.moves + 1;
+            for (Board neighborBoard : neighborBoards) {
+                Board neighborPrevBoard = null;
+                if (node.prev != null) {
+                    neighborPrevBoard = node.prev.board;
+                }
+                if (!neighborBoard.equals(neighborPrevBoard)) {
+                    Node neighborNode = new Node(neighborBoard, moves, node);
+                    nodes.insert(neighborNode);
+                }
+            }
+            node = nodes.delMin();
+        }
     }
 
     /**
@@ -29,6 +57,18 @@ public class Solver {
      */
     public Iterable<Board> solution() {
         return null;
+    }
+
+    private class Node {
+        private Board board;
+        private int moves;
+        private Node prev;
+
+        public Node(Board board, int moves, Node prev) {
+            this.board = board;
+            this.moves = moves;
+            this.prev = prev;
+        }
     }
 
     /**
