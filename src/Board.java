@@ -10,15 +10,18 @@ public class Board {
      * (where blocks[i][j] = block in row i, column j).
      */
     public Board(int[][] blocks) {
-        this.blocks = blocks.clone();
-        n = this.blocks.length;
+        n = blocks.length;
+        this.blocks = new int[n][n];
+        for (int i = 0; i < n; i++) {
+            System.arraycopy(blocks[i], 0, this.blocks[i], 0, n);
+        }
     }
 
     /**
      * Board dimension n.
      */
     public int dimension() {
-        return blocks.length;
+        return n;
     }
 
     /**
@@ -45,12 +48,14 @@ public class Board {
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 int goalAt = goalAt(i, j);
-                if (goalAt != blocks[i][j] && goalAt != BLANK) {
-                    int di = (goalAt - 1) / n;
-                    int dj = (goalAt - 1) % n;
-                    int distance = di + dj;
-                    manhattan += distance;
+                int targetAt = blocks[i][j];
+                if (goalAt == targetAt || targetAt == BLANK) {
+                    continue;
                 }
+                int di = (targetAt - 1) / n - i;
+                int dj = (targetAt - 1) % n - j;
+                int distance = Math.abs(di) + Math.abs(dj);
+                manhattan += distance;
             }
         }
         return manhattan;
@@ -60,7 +65,7 @@ public class Board {
      * Is this board the goal board?
      */
     public boolean isGoal() {
-        return manhattan() == 0;
+        return hamming() == 0;
     }
 
     /**
@@ -72,6 +77,7 @@ public class Board {
             for (int j = 0; j < n - 1; j++) {
                 if (blocks[i][j] != BLANK && blocks[i][j + 1] != BLANK) {
                     board.swap(i, j, i, j + 1);
+                    return board;
                 }
             }
         }
@@ -89,8 +95,11 @@ public class Board {
             return false;
         }
         Board that = (Board) y;
-        for (int i = 0; i < that.n; i++) {
-            for (int j = 0; j < that.n; j++) {
+        if (dimension() != that.dimension()) {
+            return false;
+        }
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
                 if (blocks[i][j] != that.blocks[i][j]) {
                     return false;
                 }
@@ -105,35 +114,35 @@ public class Board {
     public Iterable<Board> neighbors() {
         int i = 0, j = 0;
         found:
-        while (i < n) {
-            while (j < n) {
-                if (blocks[i][j] == BLANK) {
+        for (int k = 0; k < n; k++) {
+            for (int l = 0; l < n; l++) {
+                if (blocks[k][l] == BLANK) {
+                    i = k;
+                    j = l;
                     break found;
                 }
-                j++;
             }
-            i++;
         }
 
         Queue<Board> boards = new Queue<>();
         if (i > 0) {
             Board board = new Board(blocks);
-            board.swap(i ,j, i - 1, j);
+            board.swap(i, j, i - 1, j);
             boards.enqueue(board);
         }
         if (i < n - 1) {
             Board board = new Board(blocks);
-            board.swap(i ,j, i + 1, j);
+            board.swap(i, j, i + 1, j);
             boards.enqueue(board);
         }
         if (j > 0) {
             Board board = new Board(blocks);
-            board.swap(i ,j, i, j - 1);
+            board.swap(i, j, i, j - 1);
             boards.enqueue(board);
         }
         if (j < n - 1) {
             Board board = new Board(blocks);
-            board.swap(i ,j, i, j + 1);
+            board.swap(i, j, i, j + 1);
             boards.enqueue(board);
         }
         return boards;

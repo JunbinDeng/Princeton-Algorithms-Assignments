@@ -4,14 +4,16 @@ import edu.princeton.cs.algs4.Stack;
 import edu.princeton.cs.algs4.StdOut;
 
 public class Solver {
+    private Node node;
+    private final Node twinNode;
 
     /**
      * Find a solution to the initial board (using the A* algorithm).
      */
     public Solver(Board initial) {
         int moves = 0;
-        Node node = new Node(initial, moves, null);
-        Node twinNode = new Node(initial.twin(), moves, null);
+        node = new Node(initial, moves, null);
+        twinNode = new Node(initial.twin(), moves, null);
 
         MinPQ<Node> nodes = new MinPQ<>();
         nodes.insert(node);
@@ -42,24 +44,38 @@ public class Solver {
      * Is the initial board solvable?
      */
     public boolean isSolvable() {
-        return false;
+        Node firstNode = node;
+        while (firstNode.prev != null) {
+            firstNode = firstNode.prev;
+        }
+        return !firstNode.board.equals(twinNode.board);
     }
 
     /**
      * Min number of moves to solve initial board; -1 if unsolvable.
      */
     public int moves() {
-        return 0;
+        return isSolvable() ? node.moves : -1;
     }
 
     /**
      * Sequence of boards in a shortest solution; null if unsolvable.
      */
     public Iterable<Board> solution() {
-        return null;
+        if (!isSolvable()) {
+            return null;
+        }
+        Node sequenceNode = node;
+        Stack<Board> solutionBoards = new Stack<>();
+        solutionBoards.push(sequenceNode.board);
+        while (sequenceNode.prev != null) {
+            sequenceNode = sequenceNode.prev;
+            solutionBoards.push(sequenceNode.board);
+        }
+        return solutionBoards;
     }
 
-    private class Node {
+    private class Node implements Comparable<Node> {
         private Board board;
         private int moves;
         private Node prev;
@@ -69,12 +85,21 @@ public class Solver {
             this.moves = moves;
             this.prev = prev;
         }
+
+        @Override
+        public int compareTo(Node that) {
+            return getManhattanAndMoves() - that.getManhattanAndMoves();
+        }
+
+        private int getManhattanAndMoves() {
+            return board.manhattan() + moves;
+        }
     }
 
     /**
      * Solve a slider puzzle (given below).
      */
-    public static void main(String[] args){
+    public static void main(String[] args) {
         // create initial board from file
         In in = new In(args[0]);
         int n = in.readInt();
